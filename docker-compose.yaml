@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  go-database:
+    image: postgres:15.1-alpine
+    env_file:
+      - .env
+    container_name: "go-database"
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./database/migrations/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - database:/var/lib/postgresql/data
+    networks:
+      - go-app
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.1
+    container_name: cadvisor-go
+    privileged: true
+    platform: linux/amd64
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+volumes:
+  database:
+    driver: local
+networks:
+  go-app:
+    name: go-app

@@ -1,6 +1,10 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/lib/pq"
+)
 
 type Author struct {
 	AuthorId  int32
@@ -26,8 +30,9 @@ type AuthorPost struct {
 
 type PostById struct {
 	Post
-	Firstnames []string
-	Lastnames  []string
-	Usernames  []string
-	Emails     []string
+	AuthorId   pq.Int32Array `db:"authorids"`
+	Firstnames pq.StringArray
+	Lastnames  pq.StringArray
+	Usernames  pq.StringArray
+	Emails     pq.StringArray
 }

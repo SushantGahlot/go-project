@@ -3,12 +3,10 @@ package database
 import (
 	"context"
 	"errors"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type AuthorDAO struct {
-	db *Database
+	*Database
 }
 
 func (a *AuthorDAO) GetAuthorIdsByEmail(ctx context.Context, emails []string) (authorIds []int32, err error) {
@@ -17,18 +15,30 @@ func (a *AuthorDAO) GetAuthorIdsByEmail(ctx context.Context, emails []string) (a
 	}
 
 	q := `
-		SELECT authorid FROM author WHERE id IN (?)
+		SELECT authorid FROM author WHERE email IN (?)
 	`
 
-	q, args, err := sqlx.In(q, emails)
-	if err != nil {
-		return nil, err
-	}
-
-	err = a.db.SelectContext(ctx, a.db.DB, &authorIds, q, args...)
+	err = a.SelectxInContext(ctx, &authorIds, q, emails)
 	if err != nil {
 		return nil, err
 	}
 
 	return authorIds, nil
+}
+
+func (a *AuthorDAO) GetAuthorsByIds(ctx context.Context, authorIds []int32) (authors []*Author, err error) {
+	if len(authorIds) == 0 {
+		return nil, errors.New("author IDs can not be empty")
+	}
+
+	q := `
+		SELECT authorid, username, firstname, lastname, email FROM author WHERE authorid IN (?);
+	`
+
+	err = a.SelectxInContext(ctx, &authors, q, authorIds)
+	if err != nil {
+		return nil, err
+	}
+
+	return authors, nil
 }

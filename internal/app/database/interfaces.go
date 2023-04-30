@@ -2,13 +2,12 @@ package database
 
 import (
 	"context"
-
-	"github.com/jmoiron/sqlx"
+	pb "first-go-project/api/generated"
 )
 
 type DB interface {
-	MustExecContext(ctx context.Context, query string, args ...interface{}) interface{}
-	SelectContext(ctx context.Context, q sqlx.QueryerContext, dest interface{}, query string, args ...interface{}) error
+	SelectxInContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	NamedExecxContext(ctx context.Context, query string, arg interface{}) (interface{}, error)
 }
 
 type AuthorDB interface {
@@ -18,5 +17,5 @@ type AuthorDB interface {
 
 type PostDB interface {
 	GetPostsByIds(ctx context.Context, postIds []int32) (posts []*Post, err error)
-	UpsertPost(ctx context.Context, post Post) error
+	UpsertPost(ctx context.Context, post *pb.UpsertPostRequest) error
 }
